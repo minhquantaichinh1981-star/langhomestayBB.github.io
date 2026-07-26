@@ -1,1 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt Phòng Homestay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
+  <!-- Header -->
+  <div class="bg-indigo-600 text-white py-6 shadow-md text-center">
+    <h1 class="text-2xl font-bold tracking-wide">HỆ THỐNG ĐẶT PHÒNG HOMESTAY</h1>
+    <p class="text-indigo-100 text-sm mt-1">Nhanh chóng - Tự động - Tiện lợi</p>
+  </div>
+
+  <div class="max-w-xl mx-auto mt-6 px-4">
+    
+    <!-- STEP 1: FORM ĐẶT PHÒNG -->
+    <div id="bookingFormCard" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+      <h2 class="text-lg font-bold text-slate-700 border-b pb-3 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-calendar-check text-indigo-600"></i> Thông Tin Đặt Phòng
+      </h2>
+
+      <form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-4">
+        
+        <!-- Chọn Phòng -->
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Chọn Phòng (*)</label>
+          <select id="roomId" onchange="onRoomOrComboChange()" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="">-- Chọn phòng --</option>
+            <option value="L001">Phòng Lặng 001 (cinima)</option>
+            <option value="L002">Phòng Lặng 002 (cinima)</option>
+            <option value="L101">Phòng Lặng 101 (super 01)</option>
+            <option value="L102">Phòng Lặng 102 (super 02)</option>
+            <option value="L201">Phòng Lặng 201 (super 03)</option>
+            <option value="L202">Phòng Lặng 202 (cinima)</option>
+            <option value="L203">Phòng Lặng 203 (cinima)</option>
+          </select>
+        </div>
+
+        <!-- Chọn Combo -->
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Loại Combo (*)</label>
+          <select id="loaiCombo" onchange="onComboChange()" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="COMBO_2H">Combo 2 Giờ (09:00 - 21:00)</option>
+            <option value="COMBO_3H">Combo 3 Giờ (09:00 - 21:00)</option>
+            <option value="COMBO_4H">Combo 4 Giờ (09:00 - 21:00)</option>
+            <option value="QUA_DEM">Nghỉ Qua Đêm (22:00 - 09:00 sáng)</option>
+            <option value="NGAY">Theo Ngày (10:00 - 18:00)</option>
+            <option value="2N1D">2 Ngày 1 Đêm (13:00 - 11:00 hôm sau)</option>
+          </select>
+        </div>
+
+        <!-- Thời gian Check-in / Check-out -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nhận phòng (*)</label>
+            <input type="datetime-local" id="checkIn" onchange="calculatePriceUI()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Trả phòng (*)</label>
+            <input type="datetime-local" id="checkOut" onchange="calculatePriceUI()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <!-- Tùy chọn Số người & Giờ thêm -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Số lượng khách</label>
+            <input type="number" id="soNguoi" min="1" value="2" onchange="calculatePriceUI()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            <span class="text-[10px] text-slate-400">Từ người thứ 3: +120k/người</span>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Giờ ở thêm</label>
+            <input type="number" id="soGioThem" min="0" value="0" onchange="calculatePriceUI()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            <span class="text-[10px] text-slate-400">+60k/tiếng</span>
+          </div>
+        </div>
+
+        <!-- Thông tin Khách hàng -->
+        <div class="border-t pt-4 space-y-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Họ và tên (*)</label>
+            <input type="text" id="hoTen" placeholder="Nguyễn Văn A" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Số điện thoại (*)</label>
+              <input type="tel" id="sdt" placeholder="0987654321" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Email (*)</label>
+              <input type="email" id="email" placeholder="email@gmail.com" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload CCCD -->
+        <div class="border-t pt-4 space-y-3">
+          <label class="block text-xs font-semibold uppercase text-slate-500">Ảnh CCCD (Mặt trước & Sau)</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="text-xs text-slate-600 block mb-1">Mặt trước:</span>
+              <input type="file" id="imgFront" accept="image/*" required class="text-xs w-full">
+            </div>
+            <div>
+              <span class="text-xs text-slate-600 block mb-1">Mặt sau:</span>
+              <input type="file" id="imgBack" accept="image/*" required class="text-xs w-full">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng Tính Tiền Hiển Thị -->
+        <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-100 space-y-1.5 text-sm">
+          <div class="flex justify-between text-slate-600"><span>Tiền Combo:</span><span id="uiTienCombo">0 VNĐ</span></div>
+          <div class="flex justify-between text-slate-600"><span>Phụ thu người:</span><span id="uiPhuThuNguoi">0 VNĐ</span></div>
+          <div class="flex justify-between text-slate-600"><span>Phụ thu giờ:</span><span id="uiPhuThuGio">0 VNĐ</span></div>
+          <div class="flex justify-between font-bold text-indigo-900 border-t border-indigo-200 pt-2 text-base">
+            <span>TỔNG THANH TOÁN:</span>
+            <span id="uiTongTien" class="text-red-600">0 VNĐ</span>
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
+          <span>ĐĂNG KÝ & THANH TOÁN</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- STEP 2: MÀN HÌNH THANH TOÁN VIETQR & COUNTDOWN 5 PHÚT -->
+    <div id="paymentCard" class="hidden bg-white rounded-2xl shadow-xl p-6 border border-slate-100 text-center">
+      <div class="bg-amber-50 text-amber-800 p-3 rounded-xl mb-4 text-sm font-medium">
+        <i class="fa-solid fa-clock text-amber-600 animate-pulse"></i> Khung giờ đang được tạm giữ trong <span id="timer" class="font-bold text-red-600 text-base">05:00</span>
+      </div>
+
+      <h3 class="font-bold text-slate-800 text-lg">Quét Mã VietQR Để Thanh Toán</h3>
+      <p class="text-xs text-slate-500 mt-1">Hệ thống sẽ xác nhận tự động sau khi nhận được chuyển khoản</p>
+
+      <div class="my-4 inline-block p-2 border-2 border-indigo-100 rounded-2xl bg-white shadow-inner">
+        <img id="qrImage" src="" alt="Mã VietQR Thanh Toán" class="w-64 h-auto mx-auto rounded-lg">
+      </div>
+
+      <div class="bg-slate-50 p-3 rounded-xl text-left text-xs space-y-1 border border-slate-200 mb-5">
+        <div><span class="text-slate-500">Mã đơn hàng:</span> <b id="payMaDon" class="text-indigo-600">---</b></div>
+        <div><span class="text-slate-500">Số tiền:</span> <b id="payTongTien" class="text-red-600">---</b></div>
+        <div><span class="text-slate-500">Nội dung chuyển khoản:</span> <b id="payNoiDung" class="text-slate-800 select-all bg-yellow-100 px-1 rounded">---</b></div>
+      </div>
+
+      <button onclick="handleCustomerPaid()" id="btnPaid" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-check-circle"></i> TÔI ĐÃ CHUYỂN KHOẢN
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // DÁN LINK WEB APP API CỦA BẠN VÀO ĐÂY:
+    const API_URL = "https://script.google.com/macros/s/AKfycbxkQvU0NLWfy_pJIJKy_v6Wbrn9zDtviDBNvTT0KpHWZrmzlU58OrtuRtw8vR9OP6bV/exec";
+
+    let currentMaDatPhong = "";
+    let countdownInterval = null;
+
+    // Chuyển ảnh file sang mã Base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+
+    function onComboChange() {
+      const combo = document.getElementById('loaiCombo').value;
+      const now = new Date();
+      let checkIn = new Date(now);
+      let checkOut = new Date(now);
+
+      if (combo === 'QUA_DEM') {
+        checkIn.setHours(22, 0, 0, 0);
+        checkOut.setDate(checkOut.getDate() + 1);
+        checkOut.setHours(9, 0, 0, 0);
+      } else if (combo === 'NGAY') {
+        checkIn.setHours(10, 0, 0, 0);
+        checkOut.setHours(18, 0, 0, 0);
+      } else if (combo === '2N1D') {
+        checkIn.setHours(13, 0, 0, 0);
+        checkOut.setDate(checkOut.getDate() + 1);
+        checkOut.setHours(11, 0, 0, 0);
+      }
+
+      document.getElementById('checkIn').value = checkIn.toISOString().slice(0, 16);
+      document.getElementById('checkOut').value = checkOut.toISOString().slice(0, 16);
+      calculatePriceUI();
+    }
+
+    async function calculatePriceUI() {
+      const combo = document.getElementById('loaiCombo').value;
+      const checkIn = document.getElementById('checkIn').value;
+      const checkOut = document.getElementById('checkOut').value;
+      const soNguoi = document.getElementById('soNguoi').value;
+      const soGioThem = document.getElementById('soGioThem').value;
+
+      if (!checkIn) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'calculatePrice',
+            loaiCombo: combo,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            soNguoi: soNguoi,
+            soGioThem: soGioThem
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('uiTienCombo').innerText = data.tienCombo.toLocaleString('vi-VN') + ' VNĐ';
+          document.getElementById('uiPhuThuNguoi').innerText = data.phuThuNguoi.toLocaleString('vi-VN') + ' VNĐ';
+          document.getElementById('uiPhuThuGio').innerText = data.phuThuGio.toLocaleString('vi-VN') + ' VNĐ';
+          document.getElementById('uiTongTien').innerText = data.tongTien.toLocaleString('vi-VN') + ' VNĐ';
+        }
+      } catch (e) {}
+    }
+
+    async function handleBooking(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Đang xử lý...`;
+
+      try {
+        const fileFront = document.getElementById('imgFront').files[0];
+        const fileBack = document.getElementById('imgBack').files[0];
+
+        const imgFrontBase64 = fileFront ? await toBase64(fileFront) : "";
+        const imgBackBase64 = fileBack ? await toBase64(fileBack) : "";
+
+        const payload = {
+          action: 'createBooking',
+          data: {
+            roomId: document.getElementById('roomId').value,
+            tenPhong: document.getElementById('roomId').options[document.getElementById('roomId').selectedIndex].text,
+            loaiCombo: document.getElementById('loaiCombo').value,
+            checkIn: document.getElementById('checkIn').value,
+            checkOut: document.getElementById('checkOut').value,
+            soNguoi: document.getElementById('soNguoi').value,
+            soGioThem: document.getElementById('soGioThem').value,
+            hoTen: document.getElementById('hoTen').value,
+            sdt: document.getElementById('sdt').value,
+            email: document.getElementById('email').value,
+            imgFrontBase64: imgFrontBase64,
+            imgBackBase64: imgBackBase64
+          }
+        };
+
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await res.json();
+
+        if (result.success) {
+          currentMaDatPhong = result.maDatPhong;
+          document.getElementById('bookingFormCard').classList.add('hidden');
+          document.getElementById('paymentCard').classList.remove('hidden');
+
+          document.getElementById('qrImage').src = result.qrUrl;
+          document.getElementById('payMaDon').innerText = result.maDatPhong;
+          document.getElementById('payTongTien').innerText = result.tongTien.toLocaleString('vi-VN') + ' VNĐ';
+          document.getElementById('payNoiDung').innerText = result.noiDungCK;
+
+          startCountdown(result.hetHanHold);
+        } else {
+          alert(result.message);
+          btn.disabled = false;
+          btn.innerText = "ĐĂNG KÝ & THANH TOÁN";
+        }
+      } catch (err) {
+        alert("Lỗi kết nối hệ thống! Vui lòng thử lại.");
+        btn.disabled = false;
+        btn.innerText = "ĐĂNG KÝ & THANH TOÁN";
+      }
+    }
+
+    function startCountdown(expireTimestamp) {
+      countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = expireTimestamp - now;
+
+        if (distance <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('timer').innerText = "ĐÃ HẾT HẠN";
+          alert("Khung giờ tạm giữ đã hết hạn! Vui lòng thực hiện lại thao tác đặt phòng.");
+          location.reload();
+          return;
+        }
+
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        document.getElementById('timer').innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      }, 1000);
+    }
+
+    async function handleCustomerPaid() {
+      const btn = document.getElementById('btnPaid');
+      btn.disabled = true;
+      btn.innerText = "Đang ghi nhận...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'customerPaid', maDatPhong: currentMaDatPhong })
+        });
+        const result = await res.json();
+        if (result.success) {
+          clearInterval(countdownInterval);
+          alert("Hệ thống đã nhận thông tin! Nhân sự quản lý sẽ kiểm tra và gửi email xác nhận cho bạn trong ít phút.");
+          location.reload();
+        }
+      } catch (e) {
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        btn.disabled = false;
+      }
+    }
+
+    // Tự động khởi chạy mặc định
+    window.onload = () => { onComboChange(); };
+  </script>
+</body>
+</html>
