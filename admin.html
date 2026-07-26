@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang Quản Lý Homestay (Admin)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
+  <div class="bg-slate-900 text-white py-4 px-6 shadow-md flex justify-between items-center">
+    <h1 class="font-bold text-lg"><i class="fa-solid fa-user-shield text-indigo-400"></i> DÀNH CHO NHÂN SỰ QUẢN LÝ</h1>
+    <button onclick="logout()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg">Đăng xuất</button>
+  </div>
+
+  <div class="max-w-6xl mx-auto my-6 px-4">
+    
+    <!-- MÀN HÌNH ĐĂNG NHẬP PASS ADMIN -->
+    <div id="loginCard" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 mt-12 border border-slate-200">
+      <h2 class="text-center text-xl font-bold text-slate-800 mb-4">Mật Khẩu Quản Lý</h2>
+      <input type="password" id="adminPass" placeholder="Nhập mật khẩu Admin..." class="w-full p-3 border border-slate-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-indigo-500">
+      <button onclick="loadBookings()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl">ĐĂNG NHẬP</button>
+    </div>
+
+    <!-- MÀN HÌNH DANH SÁCH ĐƠN ĐẶT PHÒNG -->
+    <div id="adminDashboard" class="hidden space-y-4">
+      <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-700">Danh Sách Đơn Đặt Phòng</h3>
+        <button onclick="loadBookings()" class="bg-indigo-50 text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-indigo-100">
+          <i class="fa-solid fa-rotate"></i> Làm mới
+        </button>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-600">
+          <thead class="bg-slate-50 text-slate-700 uppercase font-bold border-b">
+            <tr>
+              <th class="p-3">Mã Đơn</th>
+              <th class="p-3">Khách Hàng</th>
+              <th class="p-3">Phòng & Thời Gian</th>
+              <th class="p-3">Tổng Tiền</th>
+              <th class="p-3">Ảnh CCCD</th>
+              <th class="p-3">Trạng Thái</th>
+              <th class="p-3 text-center">Hành Động</th>
+            </tr>
+          </thead>
+          <tbody id="bookingTableBody" class="divide-y divide-slate-100">
+            <!-- Dữ liệu render tự động -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // DÁN LINK WEB APP API CỦA BẠN VÀO ĐÂY:
+    const API_URL = "DÁN_LINK_WEB_APP_URL_CỦA_BẠN_VÀO_ĐÂY";
+
+    async function loadBookings() {
+      const pass = document.getElementById('adminPass').value;
+      if (!pass) return alert("Vui lòng nhập mật khẩu!");
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'adminGetBookings', password: pass })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('loginCard').classList.add('hidden');
+          document.getElementById('adminDashboard').classList.remove('hidden');
+
+          const tbody = document.getElementById('bookingTableBody');
+          tbody.innerHTML = '';
+
+          data.bookings.forEach(b => {
+            let statusBadge = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold">Chờ Duyệt</span>`;
+            if (b.trangThai === 'DA_DUYET') statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">Đã Duyệt</span>`;
+            if (b.trangThai === 'ADMIN_HUY_MO_LAI') statusBadge = `<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-semibold">Đã Hủy</span>`;
+
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-bold text-slate-800">${b.maDatPhong}<br><span class="text-[10px] text-slate-400">${b.thoiGianTao}</span></td>
+                <td class="p-3"><b>${b.hoTen}</b><br>${b.sdt}<br>${b.email}</td>
+                <td class="p-3"><b>${b.tenPhong}</b><br>In: ${b.checkIn}<br>Out: ${b.checkOut}</td>
+                <td class="p-3 font-bold text-red-600">${Number(b.tongTien).toLocaleString('vi-VN')} VNĐ</td>
+                <td class="p-3"><a href="${b.folderCCCD}" target="_blank" class="text-indigo-600 underline font-semibold">Xem Folder CCCD</a></td>
+                <td class="p-3">${statusBadge}</td>
+                <td class="p-3 text-center space-x-1">
+                  ${b.trangThai !== 'DA_DUYET' ? `<button onclick="approve('${b.maDatPhong}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] hover:bg-emerald-700">DUYỆT</button>` : ''}
+                  <button onclick="cancel('${b.maDatPhong}')" class="bg-rose-500 text-white px-2 py-1 rounded-lg font-bold text-[11px] hover:bg-rose-600">HỦY</button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert("Lỗi kết nối API!");
+      }
+    }
+
+    async function approve(maDatPhong) {
+      if (!confirm(`Bạn có chắc chắn muốn DUYỆT đơn ${maDatPhong}? System sẽ tự động gửi email và khóa lịch trên Google Calendar.`)) return;
+      const pass = document.getElementById('adminPass').value;
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'adminApproveBooking', password: pass, maDatPhong: maDatPhong })
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadBookings();
+    }
+
+    async function cancel(maDatPhong) {
+      if (!confirm(`Bạn có chắc muốn HỦY đơn ${maDatPhong}? Khung giờ này sẽ lập tức được MỞ LẠI trên web cho khách khác chọn.`)) return;
+      const pass = document.getElementById('adminPass').value;
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'adminCancelBooking', password: pass, maDatPhong: maDatPhong })
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadBookings();
+    }
+
+    function logout() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
