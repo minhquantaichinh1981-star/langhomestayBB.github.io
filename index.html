@@ -165,8 +165,9 @@
                 <input type="tel" id="sdt" placeholder="0987654321" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
               </div>
               <div>
-                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Email (*)</label>
-                <input type="email" id="email" placeholder="email@gmail.com" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
+                <!-- Ô EMAIL ĐÃ ĐƯỢC CHUYỂN THÀNH KHÔNG BẮT BUỘC -->
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Email (Không bắt buộc)</label>
+                <input type="email" id="email" placeholder="email@gmail.com" class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
               </div>
             </div>
 
@@ -345,7 +346,6 @@
           document.getElementById('uiTongTien').innerText = data.tongTien.toLocaleString('vi-VN') + ' đ';
         }
       } catch (e) {
-        // Dự phòng tính tạm tính nếu mất kết nối
         document.getElementById('uiTongTien').innerText = '189.000 đ';
       }
     }
@@ -382,7 +382,7 @@
             soGioThem: document.getElementById('soGioThem').value,
             hoTen: document.getElementById('hoTen').value,
             sdt: document.getElementById('sdt').value,
-            email: document.getElementById('email').value,
+            email: document.getElementById('email').value || "", // Lấy giá trị email nếu có, không có thì để rỗng
             imgFrontBase64: imgFrontBase64,
             imgBackBase64: imgBackBase64
           }
@@ -448,7 +448,7 @@
         const result = await res.json();
         if (result.success) {
           clearInterval(countdownInterval);
-          alert("Hệ thống đã nhận thông tin! Nhân sự quản lý sẽ kiểm tra và gửi email xác nhận cho bạn trong ít phút.");
+          alert("Hệ thống đã nhận thông tin! Nhân sự quản lý sẽ kiểm tra và xác nhận đơn của bạn trong ít phút.");
           location.reload();
         }
       } catch (e) {
