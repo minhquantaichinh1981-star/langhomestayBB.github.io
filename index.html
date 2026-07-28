@@ -28,7 +28,7 @@
         <!-- Chọn Phòng -->
         <div>
           <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Chọn Phòng (*)</label>
-          <select id="roomId" onchange="onRoomOrComboChange()" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+          <select id="roomId" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
             <option value="">-- Chọn phòng --</option>
             <option value="L001">Phòng Lặng 001 (cinima)</option>
             <option value="L002">Phòng Lặng 002 (cinima)</option>
@@ -53,15 +53,25 @@
           </select>
         </div>
 
-        <!-- Thời gian Check-in / Check-out -->
-        <div class="grid grid-cols-2 gap-3">
+        <!-- Thời gian Nhận & Trả phòng (ĐÃ TÁCH NGÀY / GIỜ CỘNG TỰ ĐỘNG) -->
+        <div class="space-y-3">
           <div>
             <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nhận phòng (*)</label>
-            <input type="datetime-local" id="checkIn" onchange="calculatePriceUI()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <span class="text-[11px] text-slate-400 block mb-0.5">Ngày nhận:</span>
+                <input type="date" id="checkInDate" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+              </div>
+              <div>
+                <span class="text-[11px] text-slate-400 block mb-0.5">Giờ nhận:</span>
+                <input type="time" id="checkInTime" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+              </div>
+            </div>
           </div>
+
           <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Trả phòng (*)</label>
-            <input type="datetime-local" id="checkOut" onchange="calculatePriceUI()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Trả phòng (Tự động cộng theo Combo)</label>
+            <input type="text" id="checkOutDisplay" readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-xl text-sm font-bold text-indigo-900 outline-none cursor-not-allowed" placeholder="Tự động tính theo combo...">
           </div>
         </div>
 
@@ -69,12 +79,12 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Số lượng khách</label>
-            <input type="number" id="soNguoi" min="1" value="2" onchange="calculatePriceUI()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            <input type="number" id="soNguoi" min="1" value="2" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
             <span class="text-[10px] text-slate-400">Từ người thứ 3: +120k/người</span>
           </div>
           <div>
             <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Giờ ở thêm</label>
-            <input type="number" id="soGioThem" min="0" value="0" onchange="calculatePriceUI()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
+            <input type="number" id="soGioThem" min="0" value="0" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
             <span class="text-[10px] text-slate-400">+60k/tiếng</span>
           </div>
         </div>
@@ -161,6 +171,8 @@
 
     let currentMaDatPhong = "";
     let countdownInterval = null;
+    let formattedCheckInISO = "";
+    let formattedCheckOutISO = "";
 
     // Chuyển ảnh file sang mã Base64
     const toBase64 = file => new Promise((resolve, reject) => {
@@ -170,38 +182,89 @@
       reader.onerror = error => reject(error);
     });
 
+    // Xử lý khi đổi Loại Combo
     function onComboChange() {
       const combo = document.getElementById('loaiCombo').value;
-      const now = new Date();
-      let checkIn = new Date(now);
-      let checkOut = new Date(now);
+      const timeInput = document.getElementById('checkInTime');
 
+      // Đặt giờ nhận mặc định tối ưu theo từng loại combo
       if (combo === 'QUA_DEM') {
-        checkIn.setHours(22, 0, 0, 0);
-        checkOut.setDate(checkOut.getDate() + 1);
-        checkOut.setHours(9, 0, 0, 0);
+        timeInput.value = "22:00";
       } else if (combo === 'NGAY') {
-        checkIn.setHours(10, 0, 0, 0);
-        checkOut.setHours(18, 0, 0, 0);
+        timeInput.value = "10:00";
       } else if (combo === '2N1D') {
-        checkIn.setHours(13, 0, 0, 0);
-        checkOut.setDate(checkOut.getDate() + 1);
-        checkOut.setHours(11, 0, 0, 0);
+        timeInput.value = "13:00";
+      } else {
+        if (!timeInput.value) timeInput.value = "09:00";
       }
 
-      document.getElementById('checkIn').value = checkIn.toISOString().slice(0, 16);
-      document.getElementById('checkOut').value = checkOut.toISOString().slice(0, 16);
+      calculateDateTimeAndPrice();
+    }
+
+    // Tự động tính thời gian Trả phòng & gọi API tính tiền
+    function calculateDateTimeAndPrice() {
+      const combo = document.getElementById('loaiCombo').value;
+      const dateVal = document.getElementById('checkInDate').value;
+      const timeVal = document.getElementById('checkInTime').value;
+      const soGioThem = parseInt(document.getElementById('soGioThem').value || 0);
+
+      if (!dateVal || !timeVal) return;
+
+      const checkInObj = new Date(`${dateVal}T${timeVal}`);
+      if (isNaN(checkInObj.getTime())) return;
+
+      let checkOutObj = new Date(checkInObj.getTime());
+
+      // Cộng thời gian Trả phòng dựa trên loại Combo + Giờ ở thêm
+      switch (combo) {
+        case 'COMBO_2H':
+          checkOutObj.setHours(checkOutObj.getHours() + 2 + soGioThem);
+          break;
+        case 'COMBO_3H':
+          checkOutObj.setHours(checkOutObj.getHours() + 3 + soGioThem);
+          break;
+        case 'COMBO_4H':
+          checkOutObj.setHours(checkOutObj.getHours() + 4 + soGioThem);
+          break;
+        case 'QUA_DEM':
+          checkOutObj.setHours(checkOutObj.getHours() + 11 + soGioThem);
+          break;
+        case 'NGAY':
+          checkOutObj.setHours(checkOutObj.getHours() + 8 + soGioThem);
+          break;
+        case '2N1D':
+          checkOutObj.setHours(checkOutObj.getHours() + 22 + soGioThem);
+          break;
+        default:
+          checkOutObj.setHours(checkOutObj.getHours() + 2 + soGioThem);
+      }
+
+      // Format hiển thị cho người dùng (DD/MM/YYYY HH:mm)
+      const day = String(checkOutObj.getDate()).padStart(2, '0');
+      const month = String(checkOutObj.getMonth() + 1).padStart(2, '0');
+      const year = checkOutObj.getFullYear();
+      const hours = String(checkOutObj.getHours()).padStart(2, '0');
+      const minutes = String(checkOutObj.getMinutes()).padStart(2, '0');
+
+      document.getElementById('checkOutDisplay').value = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+      // Tạo chuỗi ISO chuẩn gửi về Google Apps Script (YYYY-MM-DDTHH:mm)
+      formattedCheckInISO = `${dateVal}T${timeVal}`;
+      
+      const outMonth = String(checkOutObj.getMonth() + 1).padStart(2, '0');
+      const outDay = String(checkOutObj.getDate()).padStart(2, '0');
+      formattedCheckOutISO = `${year}-${outMonth}-${outDay}T${hours}:${minutes}`;
+
       calculatePriceUI();
     }
 
+    // Gọi API tính tiền tự động
     async function calculatePriceUI() {
       const combo = document.getElementById('loaiCombo').value;
-      const checkIn = document.getElementById('checkIn').value;
-      const checkOut = document.getElementById('checkOut').value;
       const soNguoi = document.getElementById('soNguoi').value;
       const soGioThem = document.getElementById('soGioThem').value;
 
-      if (!checkIn) return;
+      if (!formattedCheckInISO || !formattedCheckOutISO) return;
 
       try {
         const res = await fetch(API_URL, {
@@ -209,8 +272,8 @@
           body: JSON.stringify({
             action: 'calculatePrice',
             loaiCombo: combo,
-            checkIn: checkIn,
-            checkOut: checkOut,
+            checkIn: formattedCheckInISO,
+            checkOut: formattedCheckOutISO,
             soNguoi: soNguoi,
             soGioThem: soGioThem
           })
@@ -225,6 +288,7 @@
       } catch (e) {}
     }
 
+    // Xử lý gửi Đăng ký đặt phòng
     async function handleBooking(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmit');
@@ -244,8 +308,8 @@
             roomId: document.getElementById('roomId').value,
             tenPhong: document.getElementById('roomId').options[document.getElementById('roomId').selectedIndex].text,
             loaiCombo: document.getElementById('loaiCombo').value,
-            checkIn: document.getElementById('checkIn').value,
-            checkOut: document.getElementById('checkOut').value,
+            checkIn: formattedCheckInISO,
+            checkOut: formattedCheckOutISO,
             soNguoi: document.getElementById('soNguoi').value,
             soGioThem: document.getElementById('soGioThem').value,
             hoTen: document.getElementById('hoTen').value,
@@ -282,6 +346,7 @@
       }
     }
 
+    // Đếm ngược giữ phòng
     function startCountdown(expireTimestamp) {
       countdownInterval = setInterval(() => {
         const now = new Date().getTime();
@@ -301,6 +366,7 @@
       }, 1000);
     }
 
+    // Khách xác nhận đã chuyển khoản
     async function handleCustomerPaid() {
       const btn = document.getElementById('btnPaid');
       btn.disabled = true;
@@ -323,8 +389,12 @@
       }
     }
 
-    // Tự động khởi chạy mặc định
-    window.onload = () => { onComboChange(); };
+    // Khởi tạo ngày hôm nay & cấu hình ban đầu khi tải trang
+    window.onload = () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('checkInDate').value = today;
+      onComboChange();
+    };
   </script>
 </body>
 </html>
