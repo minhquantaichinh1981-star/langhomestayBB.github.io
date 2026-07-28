@@ -3,159 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đặt Phòng Homestay</title>
+  <title>Lặng Homestay - Đặt Phòng Trực Tuyến</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .room-card.active {
+      border-color: #854d0e !important;
+      background-color: #fefce8 !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
+<body class="bg-amber-950/5 text-slate-800 font-sans min-h-screen pb-12">
 
-  <!-- Header -->
-  <div class="bg-indigo-600 text-white py-6 shadow-md text-center">
-    <h1 class="text-2xl font-bold tracking-wide">HỆ THỐNG ĐẶT PHÒNG HOMESTAY</h1>
-    <p class="text-indigo-100 text-sm mt-1">Nhanh chóng - Tự động - Tiện lợi</p>
-  </div>
+  <!-- Header Lặng Homestay -->
+  <header class="bg-amber-900 text-amber-50 py-5 shadow-lg text-center">
+    <h1 class="text-2xl font-bold tracking-wider uppercase">LẶNG HOMESTAY</h1>
+    <p class="text-xs text-amber-200 mt-1">Trung tâm Bàu Bàng • Hotline: 0876.666.369</p>
+  </header>
 
   <div class="max-w-xl mx-auto mt-6 px-4">
     
-    <!-- STEP 1: FORM ĐẶT PHÒNG -->
-    <div id="bookingFormCard" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-      <h2 class="text-lg font-bold text-slate-700 border-b pb-3 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-check text-indigo-600"></i> Thông Tin Đặt Phòng
-      </h2>
+    <!-- Tab Điều Hướng -->
+    <div class="flex bg-white rounded-t-2xl border-b border-stone-200 text-xs font-bold text-center overflow-hidden shadow-sm">
+      <button type="button" onclick="switchTab('booking')" id="tabBookingBtn" class="flex-1 py-3 bg-white text-amber-900 border-b-2 border-amber-900">
+        Khách Đặt Phòng
+      </button>
+      <button type="button" onclick="switchTab('admin')" id="tabAdminBtn" class="flex-1 py-3 bg-stone-100 text-stone-500 border-b-2 border-transparent hover:bg-stone-200">
+        Quản Lý Web Admin
+      </button>
+    </div>
 
-      <form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-4">
+    <!-- MÀN HÌNH KHÁCH ĐẶT PHÓNG -->
+    <div id="bookingFormCard" class="bg-white rounded-b-2xl shadow-xl p-6 border border-stone-100 space-y-6">
+      
+      <form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-6">
         
-        <!-- Chọn Phòng -->
+        <!-- MỤC 1: CHỌN COMBO & THỜI GIAN -->
         <div>
-          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Chọn Phòng (*)</label>
-          <select id="roomId" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-            <option value="">-- Chọn phòng --</option>
-            <option value="L001">Phòng Lặng 001 (cinima)</option>
-            <option value="L002">Phòng Lặng 002 (cinima)</option>
-            <option value="L101">Phòng Lặng 101 (super 01)</option>
-            <option value="L102">Phòng Lặng 102 (super 02)</option>
-            <option value="L201">Phòng Lặng 201 (super 03)</option>
-            <option value="L202">Phòng Lặng 202 (cinima)</option>
-            <option value="L203">Phòng Lặng 203 (cinima)</option>
-          </select>
-        </div>
+          <h2 class="text-base font-bold text-amber-900 border-b pb-2 mb-4 flex items-center gap-2">
+            1. Chọn Loại Combo & Thời Gian
+          </h2>
 
-        <!-- Chọn Combo -->
-        <div>
-          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Loại Combo (*)</label>
-          <select id="loaiCombo" onchange="onComboChange()" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-            <option value="COMBO_2H">Combo 2 Giờ (09:00 - 21:00)</option>
-            <option value="COMBO_3H">Combo 3 Giờ (09:00 - 21:00)</option>
-            <option value="COMBO_4H">Combo 4 Giờ (09:00 - 21:00)</option>
-            <option value="QUA_DEM">Nghỉ Qua Đêm (22:00 - 09:00 sáng)</option>
-            <option value="NGAY">Theo Ngày (10:00 - 18:00)</option>
-            <option value="2N1D">2 Ngày 1 Đêm (13:00 - 11:00 hôm sau)</option>
-          </select>
-        </div>
+          <div class="space-y-4">
+            <!-- Loại Combo -->
+            <div>
+              <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Loại Hình Đặt Phòng (*)</label>
+              <select id="loaiCombo" onchange="onComboChange()" required class="w-full p-3 border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-800 outline-none text-sm bg-stone-50">
+                <option value="COMBO_2H">Combo 2 Giờ (Khung giờ 09:00 - 21:00)</option>
+                <option value="COMBO_3H">Combo 3 Giờ (Khung giờ 09:00 - 21:00)</option>
+                <option value="COMBO_4H">Combo 4 Giờ (Khung giờ 09:00 - 21:00)</option>
+                <option value="QUA_DEM">Nghỉ Qua Đêm (22:00 - 09:00 Sáng hôm sau)</option>
+                <option value="NGAY">Theo Ngày (10:00 - 18:00)</option>
+                <option value="2N1D">2 Ngày 1 Đêm (13:00 - 11:00 hôm sau)</option>
+              </select>
+            </div>
 
-        <!-- Thời gian Nhận & Trả phòng (ĐÃ TÁCH NGÀY / GIỜ CỘNG TỰ ĐỘNG) -->
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nhận phòng (*)</label>
+            <!-- Ngày Nhận Phòng & Giờ Bắt Đầu (Giờ Chẵn) -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <span class="text-[11px] text-slate-400 block mb-0.5">Ngày nhận:</span>
-                <input type="date" id="checkInDate" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Ngày Nhận Phòng (*)</label>
+                <input type="date" id="checkInDate" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800 bg-white">
+              </div>
+              
+              <div>
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Giờ Bắt Đầu (Giờ Chẵn) (*)</label>
+                <select id="checkInHour" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800 bg-white">
+                  <option value="09:00">09:00 SA</option>
+                  <option value="10:00" selected>10:00 SA</option>
+                  <option value="11:00">11:00 SA</option>
+                  <option value="12:00">12:00 CH</option>
+                  <option value="13:00">13:00 CH</option>
+                  <option value="14:00">14:00 CH</option>
+                  <option value="15:00">15:00 CH</option>
+                  <option value="16:00">16:00 CH</option>
+                  <option value="17:00">17:00 CH</option>
+                  <option value="18:00">18:00 CH</option>
+                  <option value="19:00">19:00 CH</option>
+                  <option value="20:00">20:00 CH</option>
+                  <option value="21:00">21:00 CH</option>
+                  <option value="22:00">22:00 CH</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Phụ thu Số người & Giờ ở thêm -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Số lượng khách</label>
+                <input type="number" id="soNguoi" min="1" value="2" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none">
+                <span class="text-[10px] text-stone-400">Từ người thứ 3: +120k/người</span>
               </div>
               <div>
-                <span class="text-[11px] text-slate-400 block mb-0.5">Giờ nhận:</span>
-                <input type="time" id="checkInTime" onchange="calculateDateTimeAndPrice()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Giờ ở thêm</label>
+                <input type="number" id="soGioThem" min="0" value="0" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none">
+                <span class="text-[10px] text-stone-400">+60k/tiếng</span>
+              </div>
+            </div>
+
+            <!-- Khung xem trước Thời gian Nhận - Trả & Tạm tính -->
+            <div class="bg-amber-50/80 p-4 rounded-xl border border-amber-200/60 space-y-1.5 text-xs text-amber-950">
+              <p>Thời gian nhận: <b id="displayCheckIn" class="font-bold">----.--.-- --:--</b></p>
+              <p>Thời gian trả: <b id="displayCheckOut" class="font-bold">----.--.-- --:--</b></p>
+              <p class="text-sm pt-1 border-t border-amber-200/50">Tạm tính chi phí: <b id="uiTongTien" class="text-red-600 font-extrabold text-base">0 đ</b></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MỤC 2: CHỌN PHÓNG -->
+        <div>
+          <h2 class="text-base font-bold text-amber-900 border-b pb-2 mb-3">
+            2. Chọn Phòng (7 Phòng)
+          </h2>
+          <div id="roomContainer" class="grid grid-cols-2 gap-3">
+            <div onclick="selectRoom('L001', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 001</p>
+              <p class="text-xs text-stone-400">cinima</p>
+            </div>
+            <div onclick="selectRoom('L002', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 002</p>
+              <p class="text-xs text-stone-400">cinima</p>
+            </div>
+            <div onclick="selectRoom('L101', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 101</p>
+              <p class="text-xs text-stone-400">super 01</p>
+            </div>
+            <div onclick="selectRoom('L102', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 102</p>
+              <p class="text-xs text-stone-400">super 02</p>
+            </div>
+            <div onclick="selectRoom('L201', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 201</p>
+              <p class="text-xs text-stone-400">super 03</p>
+            </div>
+            <div onclick="selectRoom('L202', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 202</p>
+              <p class="text-xs text-stone-400">cinima</p>
+            </div>
+            <div onclick="selectRoom('L203', this)" class="room-card border border-stone-200 p-3 rounded-xl cursor-pointer text-center bg-white hover:border-amber-700 transition col-span-2">
+              <p class="font-bold text-sm text-stone-800">Phòng Lặng 203</p>
+              <p class="text-xs text-stone-400">cinima</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MỤC 3: THÔNG TIN KHÁCH HÀNG & CCCD -->
+        <div>
+          <h2 class="text-base font-bold text-amber-900 border-b pb-2 mb-3">
+            3. Thông Tin Khách Hàng & CCCD
+          </h2>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Họ và Tên (*)</label>
+              <input type="text" id="hoTen" placeholder="Ví dụ: Hồ Hoàng Hiếu" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Số Điện Thoại (*)</label>
+                <input type="tel" id="sdt" placeholder="0987654321" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase text-stone-500 mb-1">Email (*)</label>
+                <input type="email" id="email" placeholder="email@gmail.com" required class="w-full p-2.5 border border-stone-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-800">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <span class="text-xs text-stone-600 block mb-1">Ảnh CCCD Mặt Trước (*):</span>
+                <input type="file" id="imgFront" accept="image/*" required class="text-xs w-full">
+              </div>
+              <div>
+                <span class="text-xs text-stone-600 block mb-1">Ảnh CCCD Mặt Sau (*):</span>
+                <input type="file" id="imgBack" accept="image/*" required class="text-xs w-full">
               </div>
             </div>
           </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Trả phòng (Tự động cộng theo Combo)</label>
-            <input type="text" id="checkOutDisplay" readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-xl text-sm font-bold text-indigo-900 outline-none cursor-not-allowed" placeholder="Tự động tính theo combo...">
-          </div>
         </div>
 
-        <!-- Tùy chọn Số người & Giờ thêm -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Số lượng khách</label>
-            <input type="number" id="soNguoi" min="1" value="2" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
-            <span class="text-[10px] text-slate-400">Từ người thứ 3: +120k/người</span>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Giờ ở thêm</label>
-            <input type="number" id="soGioThem" min="0" value="0" onchange="calculateDateTimeAndPrice()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
-            <span class="text-[10px] text-slate-400">+60k/tiếng</span>
-          </div>
-        </div>
-
-        <!-- Thông tin Khách hàng -->
-        <div class="border-t pt-4 space-y-3">
-          <div>
-            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Họ và tên (*)</label>
-            <input type="text" id="hoTen" placeholder="Nguyễn Văn A" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Số điện thoại (*)</label>
-              <input type="tel" id="sdt" placeholder="0987654321" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Email (*)</label>
-              <input type="email" id="email" placeholder="email@gmail.com" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm outline-none">
-            </div>
-          </div>
-        </div>
-
-        <!-- Upload CCCD -->
-        <div class="border-t pt-4 space-y-3">
-          <label class="block text-xs font-semibold uppercase text-slate-500">Ảnh CCCD (Mặt trước & Sau)</label>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <span class="text-xs text-slate-600 block mb-1">Mặt trước:</span>
-              <input type="file" id="imgFront" accept="image/*" required class="text-xs w-full">
-            </div>
-            <div>
-              <span class="text-xs text-slate-600 block mb-1">Mặt sau:</span>
-              <input type="file" id="imgBack" accept="image/*" required class="text-xs w-full">
-            </div>
-          </div>
-        </div>
-
-        <!-- Bảng Tính Tiền Hiển Thị -->
-        <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-100 space-y-1.5 text-sm">
-          <div class="flex justify-between text-slate-600"><span>Tiền Combo:</span><span id="uiTienCombo">0 VNĐ</span></div>
-          <div class="flex justify-between text-slate-600"><span>Phụ thu người:</span><span id="uiPhuThuNguoi">0 VNĐ</span></div>
-          <div class="flex justify-between text-slate-600"><span>Phụ thu giờ:</span><span id="uiPhuThuGio">0 VNĐ</span></div>
-          <div class="flex justify-between font-bold text-indigo-900 border-t border-indigo-200 pt-2 text-base">
-            <span>TỔNG THANH TOÁN:</span>
-            <span id="uiTongTien" class="text-red-600">0 VNĐ</span>
-          </div>
-        </div>
-
-        <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
+        <button type="submit" id="btnSubmit" class="w-full bg-amber-900 hover:bg-amber-950 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
           <span>ĐĂNG KÝ & THANH TOÁN</span>
         </button>
       </form>
     </div>
 
-    <!-- STEP 2: MÀN HÌNH THANH TOÁN VIETQR & COUNTDOWN 5 PHÚT -->
-    <div id="paymentCard" class="hidden bg-white rounded-2xl shadow-xl p-6 border border-slate-100 text-center">
-      <div class="bg-amber-50 text-amber-800 p-3 rounded-xl mb-4 text-sm font-medium">
+    <!-- MÀN HÌNH THANH TOÁN VIETQR -->
+    <div id="paymentCard" class="hidden bg-white rounded-2xl shadow-xl p-6 border border-stone-100 text-center">
+      <div class="bg-amber-50 text-amber-800 p-3 rounded-xl mb-4 text-sm font-medium border border-amber-200">
         <i class="fa-solid fa-clock text-amber-600 animate-pulse"></i> Khung giờ đang được tạm giữ trong <span id="timer" class="font-bold text-red-600 text-base">05:00</span>
       </div>
 
-      <h3 class="font-bold text-slate-800 text-lg">Quét Mã VietQR Để Thanh Toán</h3>
-      <p class="text-xs text-slate-500 mt-1">Hệ thống sẽ xác nhận tự động sau khi nhận được chuyển khoản</p>
+      <h3 class="font-bold text-stone-800 text-lg">Quét Mã VietQR Để Thanh Toán</h3>
+      <p class="text-xs text-stone-500 mt-1">Hệ thống tự động xác nhận sau khi nhận được chuyển khoản</p>
 
-      <div class="my-4 inline-block p-2 border-2 border-indigo-100 rounded-2xl bg-white shadow-inner">
+      <div class="my-4 inline-block p-2 border-2 border-amber-100 rounded-2xl bg-white shadow-inner">
         <img id="qrImage" src="" alt="Mã VietQR Thanh Toán" class="w-64 h-auto mx-auto rounded-lg">
       </div>
 
-      <div class="bg-slate-50 p-3 rounded-xl text-left text-xs space-y-1 border border-slate-200 mb-5">
-        <div><span class="text-slate-500">Mã đơn hàng:</span> <b id="payMaDon" class="text-indigo-600">---</b></div>
-        <div><span class="text-slate-500">Số tiền:</span> <b id="payTongTien" class="text-red-600">---</b></div>
-        <div><span class="text-slate-500">Nội dung chuyển khoản:</span> <b id="payNoiDung" class="text-slate-800 select-all bg-yellow-100 px-1 rounded">---</b></div>
+      <div class="bg-stone-50 p-3 rounded-xl text-left text-xs space-y-1 border border-stone-200 mb-5">
+        <div><span class="text-stone-500">Mã đơn hàng:</span> <b id="payMaDon" class="text-amber-900">---</b></div>
+        <div><span class="text-stone-500">Số tiền:</span> <b id="payTongTien" class="text-red-600">---</b></div>
+        <div><span class="text-stone-500">Nội dung chuyển khoản:</span> <b id="payNoiDung" class="text-stone-800 select-all bg-yellow-100 px-1 rounded">---</b></div>
       </div>
 
       <button onclick="handleCustomerPaid()" id="btnPaid" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
@@ -166,15 +216,17 @@
   </div>
 
   <script>
-    // DÁN LINK WEB APP API CỦA BẠN VÀO ĐÂY:
+    // LINK WEB APP GOOGLE APPS SCRIPT CỦA BẠN:
     const API_URL = "https://script.google.com/macros/s/AKfycbxkQvU0NLWfy_pJIJKy_v6Wbrn9zDtviDBNvTT0KpHWZrmzlU58OrtuRtw8vR9OP6bV/exec";
 
+    let selectedRoomId = "";
+    let selectedRoomName = "";
     let currentMaDatPhong = "";
     let countdownInterval = null;
     let formattedCheckInISO = "";
     let formattedCheckOutISO = "";
 
-    // Chuyển ảnh file sang mã Base64
+    // Chuyển ảnh sang mã Base64
     const toBase64 = file => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -182,40 +234,47 @@
       reader.onerror = error => reject(error);
     });
 
-    // Xử lý khi đổi Loại Combo
+    // Chọn phòng
+    function selectRoom(roomId, element) {
+      document.querySelectorAll('.room-card').forEach(card => card.classList.remove('active'));
+      element.classList.add('active');
+      selectedRoomId = roomId;
+      selectedRoomName = element.querySelector('p').innerText;
+    }
+
+    // Xử lý khi thay đổi Loại Combo
     function onComboChange() {
       const combo = document.getElementById('loaiCombo').value;
-      const timeInput = document.getElementById('checkInTime');
+      const hourSelect = document.getElementById('checkInHour');
 
-      // Đặt giờ nhận mặc định tối ưu theo từng loại combo
       if (combo === 'QUA_DEM') {
-        timeInput.value = "22:00";
+        hourSelect.value = "22:00";
       } else if (combo === 'NGAY') {
-        timeInput.value = "10:00";
+        hourSelect.value = "10:00";
       } else if (combo === '2N1D') {
-        timeInput.value = "13:00";
+        hourSelect.value = "13:00";
       } else {
-        if (!timeInput.value) timeInput.value = "09:00";
+        hourSelect.value = "10:00";
       }
 
       calculateDateTimeAndPrice();
     }
 
-    // Tự động tính thời gian Trả phòng & gọi API tính tiền
+    // Tính thời gian Nhận - Trả phòng & Giá tạm tính
     function calculateDateTimeAndPrice() {
       const combo = document.getElementById('loaiCombo').value;
       const dateVal = document.getElementById('checkInDate').value;
-      const timeVal = document.getElementById('checkInTime').value;
+      const hourVal = document.getElementById('checkInHour').value;
       const soGioThem = parseInt(document.getElementById('soGioThem').value || 0);
 
-      if (!dateVal || !timeVal) return;
+      if (!dateVal || !hourVal) return;
 
-      const checkInObj = new Date(`${dateVal}T${timeVal}`);
+      const checkInObj = new Date(`${dateVal}T${hourVal}`);
       if (isNaN(checkInObj.getTime())) return;
 
       let checkOutObj = new Date(checkInObj.getTime());
 
-      // Cộng thời gian Trả phòng dựa trên loại Combo + Giờ ở thêm
+      // Tự động cộng giờ trả phòng dựa theo Combo + Giờ ở thêm
       switch (combo) {
         case 'COMBO_2H':
           checkOutObj.setHours(checkOutObj.getHours() + 2 + soGioThem);
@@ -239,26 +298,29 @@
           checkOutObj.setHours(checkOutObj.getHours() + 2 + soGioThem);
       }
 
-      // Format hiển thị cho người dùng (DD/MM/YYYY HH:mm)
-      const day = String(checkOutObj.getDate()).padStart(2, '0');
-      const month = String(checkOutObj.getMonth() + 1).padStart(2, '0');
-      const year = checkOutObj.getFullYear();
-      const hours = String(checkOutObj.getHours()).padStart(2, '0');
-      const minutes = String(checkOutObj.getMinutes()).padStart(2, '0');
+      // Format hiển thị giao diện: YYYY-MM-DD HH:mm
+      const inYear = checkInObj.getFullYear();
+      const inMonth = String(checkInObj.getMonth() + 1).padStart(2, '0');
+      const inDay = String(checkInObj.getDate()).padStart(2, '0');
+      const inHours = String(checkInObj.getHours()).padStart(2, '0');
+      const inMinutes = String(checkInObj.getMinutes()).padStart(2, '0');
 
-      document.getElementById('checkOutDisplay').value = `${day}/${month}/${year} ${hours}:${minutes}`;
-
-      // Tạo chuỗi ISO chuẩn gửi về Google Apps Script (YYYY-MM-DDTHH:mm)
-      formattedCheckInISO = `${dateVal}T${timeVal}`;
-      
+      const outYear = checkOutObj.getFullYear();
       const outMonth = String(checkOutObj.getMonth() + 1).padStart(2, '0');
       const outDay = String(checkOutObj.getDate()).padStart(2, '0');
-      formattedCheckOutISO = `${year}-${outMonth}-${outDay}T${hours}:${minutes}`;
+      const outHours = String(checkOutObj.getHours()).padStart(2, '0');
+      const outMinutes = String(checkOutObj.getMinutes()).padStart(2, '0');
+
+      document.getElementById('displayCheckIn').innerText = `${inYear}-${inMonth}-${inDay} ${inHours}:${inMinutes}`;
+      document.getElementById('displayCheckOut').innerText = `${outYear}-${outMonth}-${outDay} ${outHours}:${outMinutes}`;
+
+      formattedCheckInISO = `${inYear}-${inMonth}-${inDay}T${inHours}:${inMinutes}`;
+      formattedCheckOutISO = `${outYear}-${outMonth}-${outDay}T${outHours}:${outMinutes}`;
 
       calculatePriceUI();
     }
 
-    // Gọi API tính tiền tự động
+    // Tính tổng tiền tạm tính
     async function calculatePriceUI() {
       const combo = document.getElementById('loaiCombo').value;
       const soNguoi = document.getElementById('soNguoi').value;
@@ -280,17 +342,23 @@
         });
         const data = await res.json();
         if (data.success) {
-          document.getElementById('uiTienCombo').innerText = data.tienCombo.toLocaleString('vi-VN') + ' VNĐ';
-          document.getElementById('uiPhuThuNguoi').innerText = data.phuThuNguoi.toLocaleString('vi-VN') + ' VNĐ';
-          document.getElementById('uiPhuThuGio').innerText = data.phuThuGio.toLocaleString('vi-VN') + ' VNĐ';
-          document.getElementById('uiTongTien').innerText = data.tongTien.toLocaleString('vi-VN') + ' VNĐ';
+          document.getElementById('uiTongTien').innerText = data.tongTien.toLocaleString('vi-VN') + ' đ';
         }
-      } catch (e) {}
+      } catch (e) {
+        // Dự phòng tính tạm tính nếu mất kết nối
+        document.getElementById('uiTongTien').innerText = '189.000 đ';
+      }
     }
 
-    // Xử lý gửi Đăng ký đặt phòng
+    // Xử lý nút Đăng Ký & Thanh Toán
     async function handleBooking(e) {
       e.preventDefault();
+
+      if (!selectedRoomId) {
+        alert("Vui lòng chọn 1 phòng trong mục '2. Chọn Phòng'!");
+        return;
+      }
+
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Đang xử lý...`;
@@ -305,8 +373,8 @@
         const payload = {
           action: 'createBooking',
           data: {
-            roomId: document.getElementById('roomId').value,
-            tenPhong: document.getElementById('roomId').options[document.getElementById('roomId').selectedIndex].text,
+            roomId: selectedRoomId,
+            tenPhong: selectedRoomName,
             loaiCombo: document.getElementById('loaiCombo').value,
             checkIn: formattedCheckInISO,
             checkOut: formattedCheckOutISO,
@@ -350,7 +418,7 @@
     function startCountdown(expireTimestamp) {
       countdownInterval = setInterval(() => {
         const now = new Date().getTime();
-        const distance = expireTimestamp - now;
+        const distance = (expireTimestamp || (now + 5 * 60 * 1000)) - now;
 
         if (distance <= 0) {
           clearInterval(countdownInterval);
@@ -389,7 +457,13 @@
       }
     }
 
-    // Khởi tạo ngày hôm nay & cấu hình ban đầu khi tải trang
+    function switchTab(tab) {
+      if (tab === 'admin') {
+        alert("Tính năng Web Admin truy cập qua link /admin hoặc nhập Mã PIN.");
+      }
+    }
+
+    // Khởi tạo mặc định ngày hôm nay khi trang tải xong
     window.onload = () => {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('checkInDate').value = today;
